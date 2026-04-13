@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/style/home.css"><!-- served from /public -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Orders</title>
+  <link rel="stylesheet" href="/style/orders.css" />
+</head>
+<body>
+  <!-- Top header -->
+  <div class="topbar">
+    <div class="logo">
+      <a href="/home" class="logo">
+        <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+      </a>      
+      <div>
+        <div class="deliver">Deliver to</div>
+        <div style="font-weight:700">Your Location</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="nav-actions">
+      <div class="nav-item">
+        <div class="account-dropdown">
+          <div class="account-label">
+            <div class="hello-text">
+              Hello, <%= user ? user.name : "Sign in" %>
+            </div>
+            <div class="account-main">Account & Lists</div>
+          </div>
+        
+          <div class="dropdown-content">
+            <% if (user) { %>
+              <a href="/orders">Your Orders</a>
+              <a href="/profile">Your Account</a>
+              <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit">Logout</button>
+              </form>
+            <% } else { %>
+              <a href="/signin">Sign in</a>
+              <a href="/signup">Create an account</a>
+            <% } %>
+          </div>
+        </div>
+        
+        
+      </div>
+      <a href="/orders" class="nav-item" style="
+     display:flex;
+     flex-direction:column;
+     text-decoration:none;
+     color:white;
+     ">
+      <span style="font-size:12px;">Returns</span>
+      <span style="font-weight:700;">& Orders</span>
+     </a>
+      <a href="/cart" class="cart" style="text-decoration:none; color:inherit">
+        <div class="count" id="cart-count"><%= cartCount || 0 %></div>
+        <div style="font-weight:700">Cart</div>
+      </a>      
+      
+    </div>
+  </div>
+  <div class="container">
+    <h1 class="page-title">Your Orders</h1>
+
+    <% if (orders.length === 0) { %>
+      <p>You have not placed any orders yet.</p>
+    <% } else { %>
+      <% orders.forEach(order => { %>
+        <div class="order-card">
+          <!-- Order Header -->
+          <div class="order-header">
+            <div class="order-info">
+              <p><strong>Order Placed:</strong> <%= order.createdAt.toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "long", 
+                day: "numeric" 
+              }) %>
+              </p>
+              <p><strong>Total:</strong> $<%= order.totalAmount.toFixed(2) %></p>
+              <p><strong>Ship To:</strong> <%= order.userId.name %></p>
+              <p><strong>Order #:</strong> <%= order._id %></p>
+            </div>
+            <div class="order-actions">
+              <a href="/orders/<%= order._id %>" class="view-btn">View Order Details</a>
+            </div>
+          </div>
+
+          <!-- Delivery Info -->
+          <div class="delivery-status">
+            <% 
+              const today = new Date();
+              const deliveryDate = new Date(order.deliveryDate);
+              const twoDaysBeforeDelivery = new Date(deliveryDate.getTime() - 2 * 24 * 60 * 60 * 1000);
+              const isDelivered = today >= deliveryDate;
+              const canCancel = today < twoDaysBeforeDelivery;
+            %>
+
+            <% if (isDelivered) { %>
+              <p><strong>Delivered:</strong> <%= deliveryDate.toLocaleDateString("en-US", {  
+                month: "long", 
+                day: "numeric" 
+              }) %></p>
+            <% } else { 
+                    if (order.allCanceled) { %>
+                      <p><strong>Order Canceled</strong></p>
+                    <% } else { %>
+                      <p><strong>In Shipping:</strong> Expected by <%= deliveryDate.toLocaleDateString("en-US", {  
+                        month: "long", 
+                        day: "numeric" 
+                        })%></p>
+                    <% } %>
+            <% } %>
+          </div>
+
+          <!-- Ordered Items -->
+          <% order.items.forEach(item => { %>
+            <div class="order-item">
+              <%= item.productId.image %>
+              <img src="<%= item.productId.url %>" alt="<%= item.productId.title %>" class="product-img" />
+              <div class="item-details">
+                <p><%= item.productId.description %></p>
+
+                <% if (isDelivered) { %>
+                  <!-- Show only when delivered -->
+                  <p class="eligible-date">
+                    Items eligible for return until 
+                    <%= new Date(order.createdAt.getTime() + 10 * 24 * 60 * 60 * 1000).toDateString() %>
+                  </p>
+                  <div class="item-buttons">
+                    <button class="btn return-btn">Return</button>
+                  </div>
+                <% } else if (canCancel) { %>
+                  <% if (item.status === "Cancelled") { %>
+                    <p class="status cancelled">Cancelled</p>
+                    <p class="refund-status">Payment: Refund in Process</p>
+                  <% } else { %>
+                      <button class="btn cancel-btn" onclick="goToCancelPage('<%= item._id %>')">Cancel</button>
+                      <% } %>
+
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+
+
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+  <script>
+    function goToCancelPage(itemId) {
+      window.location.href = `/cancel/${itemId}`;
+    }
+  </script>
+  
+
+</body>
+</html>

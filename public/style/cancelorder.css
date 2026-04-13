@@ -1,0 +1,85 @@
+/* Page background */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Main container */
+  .cancel-container {
+    width: 450px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .cancel-container h2 {
+    margin-top: 0;
+    color: #111;
+    font-weight: 600;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  
+  /* Product section */
+  .product-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .product-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  
+  .product-details h3 {
+    font-size: 16px;
+    color: #222;
+    margin: 0;
+  }
+  
+  /* Form */
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  
+  /* Submit button */
+  .confirm-cancel-btn {
+    background-color: #f0c14b;
+    border: 1px solid #a88734;
+    color: #111;
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .confirm-cancel-btn:hover {
+    background-color: #e2b33f;
+  }
+  

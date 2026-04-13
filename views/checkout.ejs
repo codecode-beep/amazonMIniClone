@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart - Mini Amazon</title>
+  <link rel="stylesheet" href="/style/cart.css">
+  <link rel="stylesheet" href="/style/product.css">
+  <link rel="stylesheet" href="/style/home.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="topbar">
+    <div class="logo">
+      <a href="/home" class="logo">
+        <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+      </a>      
+    </div>
+    <div class="nav-actions">
+      <div>Hello, <%= user ? user.name : "Guest" %></div>
+      <a href="/cart" class="cart-link">
+        <div class="count"><%= cartItems.length %></div>
+        <div>Cart</div>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container">
+    <h1>Checkout</h1>
+      <div class="cart-grid">
+        <div class="cart-items">
+          <% cartItems.forEach(item => { %>
+            <div class="cart-item">
+              <img src="<%= item.productId.url %>" alt="<%= item.productId.title %>">
+              <div class="details">
+                <h2><%= item.productId.title %></h2>
+                <p><%= item.productId.description %></p>
+                <p class="price">$<%= item.productId.price %></p>
+                <div class="delivery"><%= deliveryEstimate %></div>
+                <!-- Stock -->
+                <% if (item.productId.stock > 0) { %>
+                    <div class="stock in-stock">In Stock</div>
+                <% } else { %>
+                    <div class="stock out-stock">Unavailable</div>
+                <% } %>
+                  
+                <div class="quantity-controls">
+                      <button class="btn-decrease" data-id="<%= item.productId._id %>">-</button>
+                      <span class="qty"><%= item.quantity %></span>
+                      <button class="btn-increase" data-id="<%= item.productId._id %>">+</button>
+                </div>
+               
+              </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- Checkout summary -->
+        <aside class="summary">
+          <h3>Order Summary</h3>
+          <p>Total items: <span id="cart-count"><%= cartItems.reduce((sum, i) => sum + i.quantity, 0) %></span></p>
+          <p>
+            Total: $<span id="cart-total">
+            <%= cartItems.reduce((sum, i) => sum + (i.productId.price * i.quantity), 0) %></span>
+          </p>
+          <button id="order-btn" class="order-btn">Place your Order</button>
+        </aside>
+      </div>
+      <div>
+        
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+                    var stripe = Stripe('pk_test_51SEaDK6gg9WNoqRkTEmDICYIdgtFzxI3KZ2WBbbgHpkyrmh2mIaPbuBqKFHMeDS6nLngJVNVwDHRGJ1KSFEKi4cd00pTjtYfSR');
+                    var orderBtn = document.getElementById('order-btn');
+                    orderBtn.addEventListener('click', function() {
+                        stripe.redirectToCheckout({
+                            sessionId: '<%= sessionId %>'
+                        });
+                    });
+        </script>
+      </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cartCountEl = document.getElementById("cart-count");
+    
+      // 🔹 Update cart count on page
+      function updateCartCount(newCount) {
+        if (cartCountEl) cartCountEl.textContent = newCount;
+      }
+    
+      // 🔹 Add to cart
+      async function addToCart(productId) {
+        const res = await fetch("/cart/add", {
+          method: "POST",
+          headers: {
+             "Content-Type": "application/json",
+             "CSRF-Token": "<%= csrfToken %>" // important for security
+
+           },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) updateCartCount(data.cartCount);
+      }
+    
+      // 🔹 Increase quantity
+      async function increaseQuantity(productId, qtyEl) {
+        const res = await fetch("/cart/increase", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "CSRF-Token": "<%= csrfToken %>" // important for security
+           },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("cart-count").textContent = data.cartCount;
+          document.getElementById("cart-total").textContent = data.cartTotal;
+          updateCartCount(data.cartCount);
+          if (qtyEl) qtyEl.textContent = data.quantity;
+        }
+      }
+    
+      // 🔹 Decrease quantity
+      async function decreaseQuantity(productId, qtyEl, itemRow) {
+        const res = await fetch("/cart/decrease", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "CSRF-Token": "<%= csrfToken %>" // important for security
+         },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          //updateCartCount(data.cartCount);
+          document.getElementById("cart-count").textContent = data.cartCount;
+          document.getElementById("cart-total").textContent = data.cartTotal;
+          if (data.cartCount === 0 || (qtyEl && parseInt(qtyEl.textContent) === 1)) {
+            itemRow.remove(); // remove item from DOM if 0
+          } else if (qtyEl) {
+            qtyEl.textContent = parseInt(qtyEl.textContent) - 1;
+          }
+        }
+      }
+
+      // Attach event listeners (assuming you use classes)
+      document.querySelectorAll(".btn-add").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          addToCart(productId);
+        });
+      });
+    
+      document.querySelectorAll(".btn-increase").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          const qtyEl = btn.closest(".cart-item").querySelector(".qty");
+          increaseQuantity(productId, qtyEl);
+        });
+      });
+    
+      document.querySelectorAll(".btn-decrease").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          const itemRow = btn.closest(".cart-item");
+          const qtyEl = itemRow.querySelector(".qty");
+          decreaseQuantity(productId, qtyEl, itemRow);
+        });
+      });
+    });
+    </script>
+    
+</body>
+</html>

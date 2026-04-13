@@ -1,0 +1,174 @@
+Product Details Section
+.product-details {
+  display: flex;
+  gap: 30px;
+  margin: 20px 0;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Image */
+.product-img-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.product-img {
+  max-width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  object-fit: contain;
+  padding: 10px;
+  background: #fff;
+}
+
+/* Info Section */
+.info {
+  flex: 2;
+}
+.info .title {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.info .brand {
+  color: #007185;
+  margin-bottom: 12px;
+}
+.info .price {
+  font-size: 20px;
+  font-weight: bold;
+  color: #B12704;
+  margin-bottom: 12px;
+}
+.info .delivery {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.stock {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.in-stock {
+  color: green;
+}
+.out-stock {
+  color: red;
+}
+.add-cart-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #ffd814;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-cart-btn:hover {
+  background: #f7ca00;
+}
+.add-cart-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* About Section */
+.about {
+  margin: 20px 0;
+}
+.about h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.about p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Reviews Section */
+.reviews {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.avg-rating {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+.review {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.star {
+  color: #ccc;
+  font-size: 18px;
+}
+.star.filled {
+  color: #FFD700;
+}
+
+/* Add Review Form */
+.add-review {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.rating-input {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+.rating-input input {
+  display: none;
+}
+.rating-input label {
+  font-size: 28px;
+  cursor: pointer;
+  color: #ccc;
+  transition: color 0.2s;
+}
+.rating-input input:checked ~ label,
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+  color: #FFD700;
+}
+.add-review textarea {
+  width: 100%;
+  height: 80px;
+  margin: 10px 0;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.add-review button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #ffd814;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-review button:hover {
+  background: #f7ca00;
+}
+
+/* Button */
+.add-to-cart {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background: #FFD814;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .add-to-cart:disabled {
+    background: #ddd;
+    cursor: not-allowed;
+  }

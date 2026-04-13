@@ -1,0 +1,49 @@
+<!-- views/auth/login.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Mini Amazon</title>
+    <link rel="stylesheet" href="/style/auth.css">
+</head>
+
+<body>
+   <div>
+      <div class="logo">
+         <a href="/home" class="logo">
+            <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+          </a>          
+      </div>
+      
+      <div class="signin-container">
+            <% if (errorMessage) { %>
+               <div class="user-message user-message--error"><%= errorMessage %></div>
+            <% } %>
+            <form class="login-form" action="/signin" method="POST">
+               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+               
+               <div class="form-control">
+                  <label for="email">E-Mail</label>
+                  <input type="email" name="email" id="email" value="<%= oldInput.email %>  " required>
+               </div>
+      
+               <div class="form-control">
+                  <label for="password">Password</label>
+                  <input type="password" name="password" id="password" required>
+               </div>
+               <button type="submit">Sign In</button>
+      
+               <p class="switch-auth">
+                  Don’t have an account? <a href="/signup">Sign Up here</a>
+               </p>
+            </form>
+      </div>
+      
+   
+      <footer class="main-footer">
+         <p>&copy; <%= new Date().getFullYear() %> Mini Amazon Clone. All rights reserved.</p>
+     </footer>
+   </div> 
+</body>
+</html>

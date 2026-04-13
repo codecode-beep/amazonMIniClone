@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Amazon - Homepage</title>
+  <link rel="stylesheet" href="/style/home.css"><!-- served from /public -->
+</head>
+<body>
+  <!-- Top header -->
+  <div class="topbar">
+    <div class="logo">
+      <a href="/home" class="logo">
+        <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+      </a>      
+      <div>
+        <div class="deliver">Deliver to</div>
+        <div style="font-weight:700">Your Location</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="nav-actions">
+      <div class="nav-item">
+        <div class="account-dropdown">
+          <div class="account-label">
+            <div class="hello-text">
+              Hello, <%= user ? user.name : "Sign in" %>
+            </div>
+            <div class="account-main">Account & Lists</div>
+          </div>
+        
+          <div class="dropdown-content">
+            <% if (user) { %>
+              <a href="/orders">Your Orders</a>
+              <a href="/profile">Your Account</a>
+              <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit">Logout</button>
+              </form>
+            <% } else { %>
+              <a href="/signin">Sign in</a>
+              <a href="/signup">Create an account</a>
+            <% } %>
+          </div>
+        </div>
+        
+        
+      </div>
+      <a href="/orders" class="nav-item" style="
+     display:flex;
+     flex-direction:column;
+     text-decoration:none;
+     color:white;
+     ">
+      <span style="font-size:12px;">Returns</span>
+      <span style="font-weight:700;">& Orders</span>
+     </a>
+
+      <a href="/cart" class="cart" style="text-decoration:none; color:inherit">
+        <div class="count" id="cart-count"><%= cartCount || 0 %></div>
+        <div style="font-weight:700">Cart</div>
+      </a>      
+      
+    </div>
+  </div>
+
+  <!-- Search row -->
+<div class="search-row">
+  <form action="/products/search" method="GET" 
+        class="search-bar container" 
+        style="background:#fff;padding:8px;border-radius:6px;align-items:center;display:flex;gap:8px">
+    
+    <select name="category" 
+            style="border:none;padding:8px 10px;background:transparent;font-weight:600">
+      <option value="All">All</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Book">Book</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Toy">Toy</option>
+    </select>
+
+    <input type="text" 
+           name="q" 
+           class="search-input" 
+           placeholder="Search products, brands and more" 
+           style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px" />
+
+    <button type="submit" 
+            class="search-btn" 
+            style="padding:8px 14px;border-radius:6px;border:none;background:#ffd814;font-weight:700;cursor:pointer">
+      Search
+    </button>
+  </form>
+</div>
+
+
+  <!-- Main content -->
+  <main class="container">
+    <div class="hero">
+      <section class="hero-banner">
+        <h1>Deals & Trending</h1>
+        <p>Discover great deals on electronics, home essentials, and more — updated daily.</p>
+        <div style="margin-top:16px">
+          <button style="padding:10px 14px;border-radius:6px;border:none;background:#ffd814;font-weight:700;cursor:pointer">Shop Today's Deals</button>
+        </div>
+      </section>
+
+      <% if (!user) { %>
+        <aside class="side-card">
+          <h3 style="margin-bottom:8px">Sign in for the best experience</h3>
+          <p style="font-size:14px;color:#374151;margin-bottom:12px">Get personalized recommendations, track orders and more.</p>
+          <div style="display:flex;gap:8px">
+            
+              <form action="/signin" method="GET">
+                <button type="submit" 
+                        style="padding:8px 10px;border-radius:6px;border:1px solid #d1d5db;
+                               background:#fff;cursor:pointer">
+                  Sign in
+                </button>
+              </form>
+              <form action="/signup" method="GET">
+                <button type="submit" 
+                        style="padding:8px 10px;border-radius:6px;border:none;
+                               background:#111;color:#fff;cursor:pointer">
+                  Create account
+                </button>
+              </form>
+          </div>
+        </aside>
+      <% } %>  
+    </div>
+
+    <!-- Categories -->
+    <div class="categories">  
+      <a href="/products?category=All" class="cat">ALL</a>
+      <a href="/products?category=Best Sellers" class="cat">Best Sellers</a>
+      <a href="/products?category=Computers" class="cat">Computers</a>
+      <a href="/products?category=Toys" class="cat">Toys</a>
+      <a href="/products?category=Home & Kitchen" class="cat">Home & Kitchen</a>
+      <a href="/products?category=Fashion" class="cat">Fashion</a>
+    </div>
+
+    <!-- Product grid -->
+<section>
+  <h2 style="margin-bottom:12px">Featured Products</h2>
+  <div class="grid">
+    <% if (message) { %>
+      <div style="color: red; font-weight: bold; margin: 16px 0;">
+        <%= message %>
+      </div>
+    <% } %>    
+
+    <% products.forEach(product => { %>
+      <article class="product">
+        <!-- Product Image -->
+        <a href="/product/<%= product._id %>">
+          <img src="<%= product.url %>" alt="<%= product.title %>">
+        </a>
+
+        <!-- Title -->
+        <div class="title"><%= product.title %></div>
+
+        <!-- Brand -->
+        <div class="brand">by <%= product.brand %></div>
+
+        <!-- Rating Stars -->
+        <div class="stars">
+          <% for (let i = 1; i <= 5; i++) { %>
+            <% if (product.rating >= i) { %>
+              <span class="star full">★</span>
+            <% } else if (product.rating >= i - 0.5) { %>
+              <span class="star half">★</span>
+            <% } else { %>
+              <span class="star empty">☆</span>
+            <% } %>
+          <% } %>
+          <span class="review-count">(<%= product.reviewCount %>)</span>
+        </div>
+
+        <!-- Price -->
+        <div class="price">$<%= product.price %></div>
+        <div class="delivery"><%= deliveryEstimate %></div>
+
+        <!-- Stock -->
+        <% if (product.stock > 0) { %>
+          <div class="stock in-stock">In Stock</div>
+        <% } else { %>
+          <div class="stock out-stock">Unavailable</div>
+        <% } %>
+
+        <!-- Add to Cart -->
+        <button 
+          class="add-to-cart"
+          data-id="<%= product._id %>"
+          <%= product.stock === 0 ? "disabled" : "" %>
+        >
+          Add to Cart
+        </button>
+      </article>
+    <% }) %>
+  </div> 
+</section>
+
+
+    <footer>
+      © Mini Amazon — Demo frontend. This is a static mockup; integrate backend/api to make it functional.
+    </footer>
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const buttons = document.querySelectorAll(".add-to-cart");
+      const cartCountEl = document.getElementById("cart-count");
+    
+      buttons.forEach(button => {
+        button.addEventListener("click", async () => {
+          const productId = button.getAttribute("data-id");
+    
+          const res = await fetch("/cart/add", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "CSRF-Token": "<%= csrfToken %>" // important for security
+            },
+            body: JSON.stringify({ productId })
+          });
+    
+          const data = await res.json();
+    
+          if (data.success) {
+            cartCountEl.textContent = data.cartCount;
+            showPopup("✅ Added to cart!",button);
+          } else {
+            showPopup("❌ Failed to add to cart",button);
+          }
+        });
+      });
+    
+      function showPopup(message, button) {
+          const rect = button.getBoundingClientRect(); // button position
+
+          const popup = document.createElement("div");
+          popup.textContent = message;
+          popup.style.position = "absolute";
+          popup.style.left = rect.left + window.scrollX + "px";
+          popup.style.top = rect.top + window.scrollY - 30 + "px"; // 30px above button
+          popup.style.background = "#333";
+          popup.style.color = "#fff";
+          popup.style.padding = "6px 10px";
+          popup.style.borderRadius = "5px";
+          popup.style.fontSize = "14px";
+          popup.style.zIndex = "9999";
+          popup.style.pointerEvents = "none"; // so it doesn’t block clicks
+
+          document.body.appendChild(popup);
+
+          setTimeout(() => popup.remove(), 1500);
+      }
+
+    });
+    </script>
+    
+ </body>
+</html>

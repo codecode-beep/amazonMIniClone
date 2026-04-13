@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Amazon - Homepage</title>
+  <link rel="stylesheet" href="/style/home.css">
+  <link rel="stylesheet" href="/style/cart.css">
+</head>
+<body>
+  <!-- Top header -->
+  <div class="topbar">
+    <div class="logo">
+      <a href="/home" class="logo">
+        <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+      </a>      
+      <div>
+        <div class="deliver">Deliver to</div>
+        <div style="font-weight:700">Your Location</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="nav-actions">
+      <div class="nav-item">
+        <div class="account-dropdown">
+          <div class="account-label">
+            <div class="hello-text">
+              Hello, <%= user ? user.name : "Sign in" %>
+            </div>
+            <div class="account-main">Account & Lists</div>
+          </div>
+        
+          <div class="dropdown-content">
+            <% if (user) { %>
+              <a href="/orders">Your Orders</a>
+              <a href="/profile">Your Account</a>
+              <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit">Logout</button>
+              </form>
+            <% } else { %>
+              <a href="/signin">Sign in</a>
+              <a href="/signup">Create an account</a>
+            <% } %>
+          </div>
+        </div>
+        
+        
+      </div>
+      <a href="/orders" class="nav-item" style="
+     display:flex;
+     flex-direction:column;
+     text-decoration:none;
+     color:white;
+     ">
+      <span style="font-size:12px;">Returns</span>
+      <span style="font-weight:700;">& Orders</span>
+     </a>
+
+      <a href="/cart" class="cart" style="text-decoration:none; color:inherit">
+        <div class="count" id="cart-count"><%= cartCount || 0 %></div>
+        <div style="font-weight:700">Cart</div>
+      </a>      
+      
+    </div>
+  </div>
+
+
+  <!-- Main -->
+  <main class="container">
+    <h1>Shopping Cart</h1>
+
+    <% if (cartItems.length === 0) { %>
+      <p style="font-size:18px;color:#555;margin-top:20px;">
+        Your cart is empty. <a href="/home" style="color:#0073e6;">Shop now</a>.
+      </p>
+    <% } else { %>
+      <div class="cart-grid">
+        <div class="cart-items">
+          <% cartItems.forEach(item => { %>
+            <div class="cart-item">
+              <img src="<%= item.productId.url %>" alt="<%= item.productId.title %>">
+              <div class="details">
+                <h2><%= item.productId.title %></h2>
+                <p><%= item.productId.description %></p>
+                <p class="price">$<%= item.productId.price %></p>
+                <div class="delivery"><%= deliveryEstimate %></div>
+                <!-- Stock -->
+                <% if (item.productId.stock > 0) { %>
+                    <div class="stock in-stock">In Stock</div>
+                <% } else { %>
+                    <div class="stock out-stock">Unavailable</div>
+                <% } %>
+                  
+                <div class="quantity-controls">
+                      <button class="btn-decrease" data-id="<%= item.productId._id %>">-</button>
+                      <span class="qty"><%= item.quantity %></span>
+                      <button class="btn-increase" data-id="<%= item.productId._id %>">+</button>
+                </div>
+                <button type="submit" class="btn-remove" data-id="<%= item.productId._id %>">Delete</button>
+                
+                
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- Cart summary -->
+        <aside class="summary">
+          <h3>Order Summary</h3>
+          <p>Total items: <span id="cart-count"><%= cartItems.reduce((sum, i) => sum + i.quantity, 0) %></span></p>
+          <p>
+            Total: $<span id="cart-total">
+            <%= cartItems.reduce((sum, i) => sum + (i.productId.price * i.quantity), 0) %></span>
+          </p>
+          <a href="/checkout" class="checkout-btn">Proceed to Checkout</a>
+        </aside>
+      </div>
+    <% } %>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cartCountEl = document.getElementById("cart-count");
+    
+      // 🔹 Update cart count on page
+      function updateCartCount(newCount) {
+        if (cartCountEl) cartCountEl.textContent = newCount;
+      }
+    
+      // 🔹 Add to cart
+      async function addToCart(productId) {
+        const res = await fetch("/cart/add", {
+          method: "POST",
+          headers: {
+             "Content-Type": "application/json",
+             "CSRF-Token": "<%= csrfToken %>" // important for security
+
+           },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) updateCartCount(data.cartCount);
+      }
+    
+      // 🔹 Increase quantity
+      async function increaseQuantity(productId, qtyEl) {
+        const res = await fetch("/cart/increase", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "CSRF-Token": "<%= csrfToken %>" // important for security
+           },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("cart-count").textContent = data.cartCount;
+          document.getElementById("cart-total").textContent = data.cartTotal;
+          updateCartCount(data.cartCount);
+          if (qtyEl) qtyEl.textContent = data.quantity;
+        }
+      }
+    
+      // 🔹 Decrease quantity
+      async function decreaseQuantity(productId, qtyEl, itemRow) {
+        const res = await fetch("/cart/decrease", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "CSRF-Token": "<%= csrfToken %>" // important for security
+         },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          //updateCartCount(data.cartCount);
+          document.getElementById("cart-count").textContent = data.cartCount;
+          document.getElementById("cart-total").textContent = data.cartTotal;
+          if (data.cartCount === 0 || (qtyEl && parseInt(qtyEl.textContent) === 1)) {
+            itemRow.remove(); // remove item from DOM if 0
+          } else if (qtyEl) {
+            qtyEl.textContent = parseInt(qtyEl.textContent) - 1;
+          }
+        }
+      }
+    
+      // 🔹 Remove item
+      async function removeFromCart(productId, itemRow) {
+        const res = await fetch("/cart/remove", {
+          method: "POST",
+          headers: {
+             "Content-Type": "application/json",
+             "CSRF-Token": "<%= csrfToken %>" // important for security
+
+           },
+          body: JSON.stringify({ productId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          //updateCartCount(data.cartCount);
+          document.getElementById("cart-count").textContent = data.cartCount;
+          document.getElementById("cart-total").textContent = data.cartTotal;
+          itemRow.remove();
+        }
+      }
+    
+      // Attach event listeners (assuming you use classes)
+      document.querySelectorAll(".btn-add").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          addToCart(productId);
+        });
+      });
+    
+      document.querySelectorAll(".btn-increase").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          const qtyEl = btn.closest(".cart-item").querySelector(".qty");
+          increaseQuantity(productId, qtyEl);
+        });
+      });
+    
+      document.querySelectorAll(".btn-decrease").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          const itemRow = btn.closest(".cart-item");
+          const qtyEl = itemRow.querySelector(".qty");
+          decreaseQuantity(productId, qtyEl, itemRow);
+        });
+      });
+    
+      document.querySelectorAll(".btn-remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const productId = btn.dataset.id;
+          const itemRow = btn.closest(".cart-item");
+          removeFromCart(productId, itemRow);
+        });
+      });
+    });
+    </script>
+    
+</body>
+</html>

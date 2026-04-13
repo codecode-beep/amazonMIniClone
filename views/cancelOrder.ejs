@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Cancel Order</title>
+  <link rel="stylesheet" href="/style/cancelorder.css">
+</head>
+<body>
+  <div class="cancel-container">
+    <h2>Cancel Order</h2>
+    <div class="product-details">
+      <img src="<%= item.productId.url %>" alt="<%= item.productId.title %>" class="product-img" />
+      <h3><%= item.productId.title %></h3>
+    </div>
+
+    <form action="/cancel/<%= item._id %>" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label for="reason">Reason for cancellation:</label>
+      <select id="reason" name="reason" required>
+        <option value="">Select a reason</option>
+        <option value="Changed my mind">Changed my mind</option>
+        <option value="Found cheaper elsewhere">Found cheaper elsewhere</option>
+        <option value="Order delay">Order delay</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <button type="submit" class="btn confirm-cancel-btn">Confirm Cancel</button>
+    </form>
+  </div>
+</body>
+</html>

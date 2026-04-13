@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Amazon - Homepage</title>
+  <link rel="stylesheet" href="/style/home.css"><!-- served from /public -->
+  <link rel="stylesheet" href="/style/product.css">
+</head>
+<body>
+  <!-- Top header -->
+  <div class="topbar">
+    <div class="logo">
+      <a href="/home" class="logo">
+        <img src="https://d2o1l8drkre10p.cloudfront.net/logo/logoM.png" alt="logo">
+      </a>      
+      <div>
+        <div class="deliver">Deliver to</div>
+        <div style="font-weight:700">Your Location</div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div class="nav-actions">
+      <div class="nav-item">
+        <div class="account-dropdown">
+          <div class="account-label">
+            <div class="hello-text">
+              Hello, <%= user ? user.name : "Sign in" %>
+            </div>
+            <div class="account-main">Account & Lists</div>
+          </div>
+        
+          <div class="dropdown-content">
+            <% if (user) { %>
+              <a href="/orders">Your Orders</a>
+              <a href="/profile">Your Account</a>
+              <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit">Logout</button>
+              </form>
+            <% } else { %>
+              <a href="/signin">Sign in</a>
+              <a href="/signup">Create an account</a>
+            <% } %>
+          </div>
+        </div>
+        
+        
+      </div>
+      <div class="nav-item">
+        <div style="font-size:12px">Returns</div>
+        <div style="font-weight:700">& Orders</div>
+      </div>
+      <a href="/cart" class="cart" style="text-decoration:none; color:inherit">
+        <div class="count" id="cart-count"><%= cartCount || 0 %></div>
+        <div style="font-weight:700">Cart</div>
+      </a>      
+      
+    </div>
+  </div>
+
+  <!-- Search row -->
+<div class="search-row">
+  <form action="/products/search" method="GET" 
+        class="search-bar container" 
+        style="background:#fff;padding:8px;border-radius:6px;align-items:center;display:flex;gap:8px">
+    
+    <select name="category" 
+            style="border:none;padding:8px 10px;background:transparent;font-weight:600">
+      <option value="All">All</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Book">Book</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Toy">Toy</option>
+    </select>
+
+    <input type="text" 
+           name="q" 
+           class="search-input" 
+           placeholder="Search products, brands and more" 
+           style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px" />
+
+    <button type="submit" 
+            class="search-btn" 
+            style="padding:8px 14px;border-radius:6px;border:none;background:#ffd814;font-weight:700;cursor:pointer">
+      Search
+    </button>
+  </form>
+</div>
+
+  <!-- Main content -->
+  <main class="container">
+
+  <section class="product-details">
+    <div class="product-img-wrapper">
+      <img src="<%= product.url %>" alt="<%= product.title %>" class="product-img">
+    </div>
+  
+    <div class="info">
+      <h2 class="title"><%= product.title %></h2>
+      <div class="brand">by <%= product.brand %></div>
+      
+      <!-- Rating Stars -->
+      <div class="stars">
+        <% for (let i = 1; i <= 5; i++) { %>
+          <% if (product.rating >= i) { %>
+            <span class="star full">★</span>
+          <% } else if (product.rating >= i - 0.5) { %>
+            <span class="star half">★</span>
+          <% } else { %>
+            <span class="star empty">☆</span>
+          <% } %>
+        <% } %>
+        <span class="review-count">(<%= product.reviewCount %>)</span>
+      </div>
+
+      <div class="price">$<%= product.price %></div>
+      <div class="delivery"><%= deliveryEstimate %></div>
+
+      <% if (product.stock > 0) { %>
+        <div class="stock in-stock">In Stock</div>
+      <% } else { %>
+        <div class="stock out-stock">Unavailable</div>
+      <% } %>
+
+      <button 
+          class="add-to-cart"
+          data-id="<%= product._id %>"
+          <%= product.stock === 0 ? "disabled" : "" %>
+        >
+          Add to Cart
+        </button>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="about">
+    <h3>About this item</h3>
+    <p><%= product.description %></p>
+  </section>
+
+  <!-- Reviews -->
+<section class="reviews">
+  <h3>Customer Reviews</h3>
+
+  <div class="avg-rating">
+    Average Rating:
+    <% for (let i = 1; i <= 5; i++) { %>
+      <span class="<%= i <= Math.round(product.rating) ? 'star filled' : 'star' %>">★</span>
+    <% } %>
+    (<%= product.reviewCount %> reviews)
+  </div>
+
+  <% 
+    // Filter out reviews where user is null (deleted users)
+    const validReviews = product.reviews.filter(r => r.user !== null);
+  %>
+  <% if (validReviews.length === 0) { %>
+    <p>No reviews yet.</p>
+  <% } else { %>
+    <% validReviews.forEach(r => { %>
+      <div class="review">
+        <div class="review-header">
+          <strong><%= r.user.name %></strong> -
+          <% for (let i = 1; i <= 5; i++) { %>
+            <span class="<%= i <= r.stars ? 'star filled' : 'star' %>">★</span>
+          <% } %>
+        </div>
+
+        <p><%= r.comment %></p>
+
+        <% if (user && r.user._id.toString() === user._id.toString()) { %>
+          <div class="review-actions">
+            <form action="/product/<%= product._id %>/review/<%= r._id %>?_method=PUT" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              
+              <label for="stars">Stars:</label>
+              <input type="number" name="stars" min="1" max="5" value="<%= r.stars %>" required>
+            
+              <label for="comment">Comment:</label>
+              <textarea name="comment" required><%= r.comment %></textarea>
+            
+              <button type="submit">Save Changes</button>
+            </form>
+            
+
+            <!-- Delete Review -->
+            <form action="/product/<%= product._id %>/review/<%= r._id %>?_method=DELETE" method="POST" style="display:inline;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn-delete" onclick="return confirm('Delete this review?');">Delete</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</section>
+
+
+  <!-- Add Review -->
+  <section class="add-review">
+    <h3>Write a Review</h3>
+    <form action="/product/<%= product._id %>/review" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="rating-input">
+        <% for (let i = 5; i >= 1; i--) { %>
+          <input type="radio" id="star<%= i %>" name="stars" value="<%= i %>" required>
+          <label for="star<%= i %>">★</label>
+        <% } %>
+      </div>
+
+      <label for="comment">Comment:</label>
+      <textarea name="comment" required></textarea>
+
+      <button type="submit">Submit Review</button>
+    </form>
+  </section>
+
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const buttons = document.querySelectorAll(".add-to-cart");
+      const cartCountEl = document.getElementById("cart-count");
+    
+      buttons.forEach(button => {
+        button.addEventListener("click", async () => {
+          const productId = button.getAttribute("data-id");
+    
+          const res = await fetch("/cart/add", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "CSRF-Token": "<%= csrfToken %>" // important for security
+            },
+            body: JSON.stringify({ productId })
+          });
+    
+          const data = await res.json();
+    
+          if (data.success) {
+            cartCountEl.textContent = data.cartCount;
+            showPopup("✅ Added to cart!",button);
+          } else {
+            showPopup("❌ Failed to add to cart",button);
+          }
+        });
+      });
+    
+      function showPopup(message, button) {
+          const rect = button.getBoundingClientRect(); // button position
+
+          const popup = document.createElement("div");
+          popup.textContent = message;
+          popup.style.position = "absolute";
+          popup.style.left = rect.left + window.scrollX + "px";
+          popup.style.top = rect.top + window.scrollY - 30 + "px"; // 30px above button
+          popup.style.background = "#333";
+          popup.style.color = "#fff";
+          popup.style.padding = "6px 10px";
+          popup.style.borderRadius = "5px";
+          popup.style.fontSize = "14px";
+          popup.style.zIndex = "9999";
+          popup.style.pointerEvents = "none"; // so it doesn’t block clicks
+
+          document.body.appendChild(popup);
+
+          setTimeout(() => popup.remove(), 1500);
+      }
+
+    });
+    </script>
+    
+ </body>
+</html>

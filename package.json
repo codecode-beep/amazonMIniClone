@@ -1,0 +1,30 @@
+{
+  "name": "amazonminiclone",
+  "version": "1.0.0",
+  "description": "A mini Amazon Clone Project",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Aditi",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.943.0",
+    "aws-sdk": "^2.1692.0",
+    "bcryptjs": "^3.0.2",
+    "connect-flash": "^0.1.1",
+    "connect-mongodb-session": "^5.0.0",
+    "csurf": "^1.11.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "express-validator": "^7.2.1",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.18.1",
+    "nodemailer": "^7.0.6",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "stripe": "^19.1.0"
+  }
+}
