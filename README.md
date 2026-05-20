@@ -32,6 +32,12 @@ Full-stack e-commerce demo: browse products, manage a cart, check out with Strip
 ### Orders
 ![Orders page](images/OrderPage.png)
 
+## Demo video
+
+The full walkthrough is hosted on Google Drive (the `.mp4` is too large for GitHub’s 100 MB file limit).
+
+**[Watch Demo.mp4 on Google Drive](https://drive.google.com/file/d/1Gpbhw-sT-EmBlducOWBUR9U_1auQxW9D/view?usp=drive_link)**
+
 ## Tech stack
 
 - **Runtime:** Node.js  
