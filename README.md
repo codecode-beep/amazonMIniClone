@@ -12,6 +12,26 @@ Full-stack e-commerce demo: browse products, manage a cart, check out with Strip
 - Order history and line-item cancellation
 - CSRF protection on forms
 
+## Project screenshots
+
+### Home
+![Home page](images/homePage.png)
+
+### Sign in
+![Sign in page](images/login.png)
+
+### Sign up
+![Sign up page](images/Signup.png)
+
+### Product detail
+![Product page](images/productPage.png)
+
+### Checkout / payment
+![Payment page](images/PaymentPage.png)
+
+### Orders
+![Orders page](images/OrderPage.png)
+
 ## Tech stack
 
 - **Runtime:** Node.js  

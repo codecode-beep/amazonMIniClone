@@ -3,3 +3,4 @@ node_modules/
 .env.local
 *.pem
 .DS_Store
+*.mp4
